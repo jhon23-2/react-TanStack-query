@@ -1,8 +1,11 @@
+import { useEffect } from "react";
+import { useInView } from "react-intersection-observer";
 import { Link } from "react-router-dom";
 import { useGetTaskInfiniteScroll } from "../hooks/getTaks";
 import { Card } from "./Card";
-
 export const Home = () => {
+  const { ref, inView } = useInView();
+
   const {
     data,
     isLoading,
@@ -14,6 +17,12 @@ export const Home = () => {
 
   // Flatten pages -> tasks
   const allTasks = data?.pages?.flatMap((p) => p.tasks) || [];
+
+  useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   return (
     <div className="flex flex-col w-full h-full">
@@ -43,49 +52,18 @@ export const Home = () => {
 
         {hasNextPage && (
           <div className="col-span-3 flex justify-center mt-4">
-            <button
-              onClick={() => fetchNextPage()}
-              disabled={!hasNextPage || isFetchingNextPage}
-              className="flex items-center cursor-pointer gap-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg shadow-lg transition-all duration-200 hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:hover:scale-100"
+            <div
+              ref={ref}
+              className="flex items-center cursor-pointer gap-2  text-white font-semibold py-3 px-6"
             >
               {isFetchingNextPage ? (
-                <>
-                  Loading...
-                  <svg
-                    className="w-5 h-5 animate-spin"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                    />
-                  </svg>
-                </>
+                <p>Loading...</p>
               ) : hasNextPage ? (
-                <>
-                  Load More
-                  <svg
-                    className="w-5 h-5 animate-bounce"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </>
+                <p>Load More</p>
               ) : (
                 "No More Tasks"
               )}
-            </button>
+            </div>
           </div>
         )}
       </div>
