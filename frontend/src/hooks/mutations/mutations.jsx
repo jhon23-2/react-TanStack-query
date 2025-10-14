@@ -2,6 +2,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { create, drop, update } from "../../api/service";
 
+//TODO... you need understand new feature about optimistic update with inifinite query scroll
+
 // Helper: apply updater to either single-page shape ({ tasks }) or infinite ({ pages: [{ tasks }, ...] })
 const applyUpdater = (data, updater) => {
   if (!data) return data;
