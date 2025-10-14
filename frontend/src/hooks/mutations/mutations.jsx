@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 import { create, drop, update } from "../../api/service";
 
 // Helper: apply updater to either single-page shape ({ tasks }) or infinite ({ pages: [{ tasks }, ...] })
@@ -58,6 +59,7 @@ export const useMutationCreate = () => {
       console.log(
         "Creation failed! " + error.message + " Reverting changes..."
       );
+      toast.error("Creation failed! " + error.message);
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["task"] });
@@ -103,6 +105,8 @@ export const useMutationUpdate = () => {
           " Reverting changes..." +
           updateTask.id
       );
+
+      toast.error("Update failed! " + error.message);
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["task"] });
@@ -142,6 +146,7 @@ export const useMutationDrop = () => {
       console.log(
         "Drop failed! " + error.message + " Reverting changes..." + id
       );
+      toast.error("Drop failed! " + error.message);
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["task"] });
