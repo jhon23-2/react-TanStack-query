@@ -1,27 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 import { create, drop, update } from "../../api/service";
-
-// Helper: apply updater to either single-page shape ({ tasks }) or infinite ({ pages: [{ tasks }, ...] })
-const applyUpdater = (data, updater) => {
-  if (!data) return data;
-  if (data.pages) {
-    return {
-      ...data,
-      pages: data.pages.map((page) => ({
-        ...page,
-        tasks: updater(page.tasks),
-      })),
-    };
-  }
-  if (data.tasks) {
-    return { ...data, tasks: updater(data.tasks) };
-  }
-  // fallback: if data is an array of tasks
-  if (Array.isArray(data)) {
-    return updater(data);
-  }
-  return data;
-};
 
 export const useMutationCreate = () => {
   const queryClient = useQueryClient();
@@ -32,32 +11,29 @@ export const useMutationCreate = () => {
     onMutate: async (newTask) => {
       await queryClient.cancelQueries({ queryKey: ["task"] });
 
-      const previous = queryClient.getQueriesData(["task"]);
+      const previousData = queryClient.getQueryData(["task"]);
 
-      previous.forEach(([queryKey, data]) => {
-        if (!data) return;
-        queryClient.setQueryData(queryKey, (old) =>
-          applyUpdater(old, (tasks) => [
-            ...tasks,
-            { id: Date.now(), ...newTask },
-          ])
-        );
+      queryClient.setQueryData(["task"], (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          tasks: [...old.tasks, { id: Date.now(), ...newTask }],
+        };
       });
 
-      return { previous };
+      return { previousData };
     },
     onSuccess: (data) => {
       console.log("Creation successful! " + data.message);
     },
     onError: (error, newTask, context) => {
-      if (context?.previous) {
-        context.previous.forEach(([queryKey, snapshot]) => {
-          queryClient.setQueryData(queryKey, snapshot);
-        });
+      if (context?.previousData) {
+        queryClient.setQueryData(["task"], context.previousData);
       }
       console.log(
         "Creation failed! " + error.message + " Reverting changes..."
       );
+      toast.error(error.message, { duration: 3500 });
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["task"] });
@@ -73,29 +49,26 @@ export const useMutationUpdate = () => {
     onMutate: async (updateTask) => {
       await queryClient.cancelQueries({ queryKey: ["task"] });
 
-      const previous = queryClient.getQueriesData(["task"]);
+      const previousData = queryClient.getQueryData(["task"]);
 
-      previous.forEach(([queryKey, data]) => {
-        if (!data) return;
-        queryClient.setQueryData(queryKey, (old) =>
-          applyUpdater(old, (tasks) =>
-            tasks.map((task) =>
-              task.id === updateTask.id ? { ...task, ...updateTask } : task
-            )
-          )
-        );
+      queryClient.setQueryData(["task"], (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          tasks: old.tasks.map((task) =>
+            task.id === updateTask.id ? { ...task, ...updateTask } : task
+          ),
+        };
       });
 
-      return { previous };
+      return { previousData };
     },
     onSuccess: (data) => {
       console.log("Update successful! " + data.message);
     },
     onError: (error, updateTask, context) => {
-      if (context?.previous) {
-        context.previous.forEach(([queryKey, snapshot]) => {
-          queryClient.setQueryData(queryKey, snapshot);
-        });
+      if (context?.previousData) {
+        queryClient.setQueryData(["task"], context.previousData);
       }
       console.log(
         "Update failed! " +
@@ -103,6 +76,7 @@ export const useMutationUpdate = () => {
           " Reverting changes..." +
           updateTask.id
       );
+      toast.error(error.message, { duration: 3500 });
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["task"] });
@@ -119,29 +93,29 @@ export const useMutationDrop = () => {
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey: ["task"] });
 
-      const previous = queryClient.getQueriesData(["task"]);
+      const previousData = queryClient.getQueryData(["task"]);
 
-      previous.forEach(([queryKey, data]) => {
-        if (!data) return;
-        queryClient.setQueryData(queryKey, (old) =>
-          applyUpdater(old, (tasks) => tasks.filter((task) => task.id !== id))
-        );
+      queryClient.setQueryData(["task"], (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          tasks: old.tasks.filter((task) => task.id !== id),
+        };
       });
 
-      return { previous };
+      return { previousData };
     },
     onSuccess: (data) => {
       console.log("Drop successful! " + data.message);
     },
     onError: (error, id, context) => {
-      if (context?.previous) {
-        context.previous.forEach(([queryKey, snapshot]) => {
-          queryClient.setQueryData(queryKey, snapshot);
-        });
+      if (context?.previousData) {
+        queryClient.setQueryData(["task"], context.previousData);
       }
       console.log(
         "Drop failed! " + error.message + " Reverting changes..." + id
       );
+      toast.error(error.message, { duration: 3500 });
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["task"] });
