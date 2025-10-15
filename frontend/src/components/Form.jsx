@@ -1,9 +1,36 @@
+import { useEffect } from "react";
+import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 import { useMutationCreate } from "../hooks/mutations/mutations";
 
 export const Form = () => {
   const { mutate, isPending } = useMutationCreate();
   const navigate = useNavigate();
+  const { isAuth } = useAuth();
+
+  useEffect(() => {
+    if (!isAuth) {
+      navigate("/login");
+      toast.custom((t) => (
+        <div
+          className={`${
+            t.visible ? "animate-enter" : "animate-leave"
+          } max-w-md w-full bg-white shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
+        >
+          <div className="flex-1 w-0 p-4">
+            <div className="flex items-start">
+              <div className="ml-3 flex-1">
+                <p className="text-sm font-medium text-gray-900">
+                  You must be logged in to create a task.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      ));
+    }
+  }, [isAuth, navigate]);
 
   const handlerSubmit = (e) => {
     e.preventDefault();

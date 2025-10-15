@@ -1,3 +1,4 @@
+import { useAuth } from "../contexts/AuthContext";
 import {
   useMutationDrop,
   useMutationUpdate,
@@ -7,6 +8,7 @@ export const Card = ({ task }) => {
   const { id, title, description, status, priority, dueDate } = task;
   const { mutate: mutateUpdate } = useMutationUpdate();
   const { mutate: mutateDrop } = useMutationDrop();
+  const { isAuth } = useAuth();
 
   const handlerDrop = (id) => {
     if (window.confirm("Are you sure to drop this task?")) {
@@ -33,6 +35,7 @@ export const Card = ({ task }) => {
           id="check"
           type="checkbox"
           checked={status === "done" ? true : false}
+          disabled={!isAuth}
           onChange={(e) => {
             const updateTask = {
               id,
@@ -50,8 +53,13 @@ export const Card = ({ task }) => {
       <div className="flex justify-between w-full">
         <p>Due Date: {new Date(dueDate).toLocaleDateString()}</p>
         <button
+          disabled={!isAuth}
           onClick={() => handlerDrop(id)}
-          className="font-bold text-red-500 rounded-2xl border px-2 py-1 hover:bg-red-500 hover:text-white transition cursor-pointer"
+          className={`${
+            isAuth
+              ? "font-bold text-red-500 rounded-2xl border px-2 py-1 hover:bg-red-500 hover:text-white transition cursor-pointer"
+              : "font-bold text-gray-300 rounded-2xl border px-2 py-1 cursor-not-allowed"
+          } `}
         >
           Drop
         </button>

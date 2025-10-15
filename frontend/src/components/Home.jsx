@@ -1,10 +1,13 @@
 import { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import { Link } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 import { useGetTaskInfiniteScroll } from "../hooks/getTaks";
 import { Card } from "./Card";
+
 export const Home = () => {
   const { ref, inView } = useInView();
+  const { isAuth } = useAuth();
 
   const {
     data,
@@ -26,16 +29,35 @@ export const Home = () => {
 
   return (
     <div className="flex flex-col w-full h-full">
-      <h1 className="font-bold text-3xl mb-2">
+      <header className="w-full p-4 border-b border-gray-300 flex justify-end items-center">
+        {!isAuth ? (
+          <Link
+            to={"/login"}
+            className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition-all duration-200"
+          >
+            Login
+          </Link>
+        ) : (
+          <Link
+            to={"/login"}
+            className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded transition-all duration-200"
+          >
+            logout
+          </Link>
+        )}
+      </header>
+      <h1 className="font-bold text-3xl mb-2 py-12 text-center">
         Welcome Optimistip Update Example
       </h1>
 
-      <Link
-        to={"/create"}
-        className="fixed bottom-8 right-8 bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-6 rounded-full shadow-lg transition-all duration-200 hover:scale-110"
-      >
-        + Create
-      </Link>
+      {isAuth && (
+        <Link
+          to={"/create"}
+          className="fixed bottom-8 right-8 bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-6 rounded-full shadow-lg transition-all duration-200 hover:scale-110"
+        >
+          + Create
+        </Link>
+      )}
 
       <div className="grid auto-rows-auto grid-cols-3 mt-12">
         {isLoading && (
