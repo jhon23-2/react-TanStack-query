@@ -1,5 +1,5 @@
 import { onAuthStateChanged } from "firebase/auth";
-import { createContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { auth } from "../firebase";
 
 const AuthContext = createContext(null);
@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }) => {
       setUser(u || null);
       setIsAuth(!!u);
       if (u) {
-        localStorage.setItem("isAuth", "true");
+        localStorage.setItem("isAuth", true);
       } else {
         localStorage.removeItem("isAuth");
       }
@@ -28,10 +28,4 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-export const useAuth = () => {
-  const context = AuthContext._currentValue;
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
-};
+export const useAuth = () => useContext(AuthContext);

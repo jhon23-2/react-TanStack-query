@@ -13,6 +13,9 @@ export const useGetTaskInfiniteScroll = () => {
         : undefined;
     },
     initialPageParam: 1,
+    staleTime: 1000 * 30, // 30 seconds
+    cacheTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnWindowFocus: true,
   });
 };
 
