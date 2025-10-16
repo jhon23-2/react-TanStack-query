@@ -2,11 +2,11 @@ import { signInWithPopup, signOut } from "firebase/auth";
 import { Link } from "react-router-dom";
 import { auth, googleProvider } from "../config/firebase";
 import { useAuth } from "../context/context";
-import { useGetTasks } from "../hooks/getTaks";
+import { useGetAllFirebaseByUserId } from "../hooks/getTaks";
 import { Card } from "./Card";
 
 export const Home = () => {
-  const { data, isLoading, isError } = useGetTasks();
+  const { data, isLoading, isError } = useGetAllFirebaseByUserId();
   const { isAuth, user, setIsAuth } = useAuth();
 
   const handlerLogin = async () => {
@@ -61,13 +61,14 @@ export const Home = () => {
       <h1 className="font-bold text-3xl mt-8">
         Welcome Optimistip Update Example
       </h1>
-
-      <Link
-        to={"/create"}
-        className="fixed bottom-8 right-8 bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-6 rounded-full shadow-lg transition-all duration-200 hover:scale-110"
-      >
-        + Create
-      </Link>
+      {isAuth && (
+        <Link
+          to={"/create"}
+          className="fixed bottom-8 right-8 bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-6 rounded-full shadow-lg transition-all duration-200 hover:scale-110"
+        >
+          + Create
+        </Link>
+      )}
 
       <div className="grid auto-rows-auto grid-cols-3 mt-12">
         {isLoading && (
@@ -77,11 +78,18 @@ export const Home = () => {
           <p className="text-red-600 font-bold text-2xl">Error loading data</p>
         )}
 
-        {data &&
-          data.tasks?.map((task) => {
-            const { id } = task;
-            return <Card key={id} task={task} />;
-          })}
+        {isAuth && data && data?.length > 0 ? (
+          data?.map((todo) => {
+            const { id } = todo;
+            return <Card key={id} todo={todo} />;
+          })
+        ) : (
+          <div className="col-span-3 text-center font-semibold text-3xl">
+            <p className="text-xl text-gray-600">
+              Hello {displayName}, you don't have any todos yet!
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

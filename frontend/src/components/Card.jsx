@@ -1,23 +1,23 @@
 import { useAuth } from "../context/context";
 import {
-  useMutationDrop,
-  useMutationUpdate,
-} from "../hooks/mutations/mutations";
+  useFirebaseDeleteMutation,
+  useFirebaseUpdateMutation,
+} from "../mutations/fireMutation";
 
-export const Card = ({ task }) => {
-  const { id, title, description, status, priority, dueDate } = task;
-  const { mutate: mutateUpdate } = useMutationUpdate();
-  const { mutate: mutateDrop } = useMutationDrop();
+export const Card = ({ todo }) => {
+  const { id, title, description, status, priority, dueDate } = todo;
   const { isAuth } = useAuth();
+  const { mutate: mutateUpdate } = useFirebaseUpdateMutation();
+  const { mutate: mutateDrop } = useFirebaseDeleteMutation();
 
   const handlerDrop = (id) => {
-    if (window.confirm("Are you sure to drop this task?")) {
+    if (window.confirm("Are you sure to drop this todo?")) {
       mutateDrop(id);
     }
   };
 
-  const handlerUpdate = (updateTask) => {
-    mutateUpdate(updateTask);
+  const handlerUpdate = (todoId, updates) => {
+    mutateUpdate({ todoId, updates });
   };
 
   return (
@@ -37,7 +37,7 @@ export const Card = ({ task }) => {
           type="checkbox"
           checked={status === "done" ? true : false}
           onChange={(e) => {
-            const updateTask = {
+            const updates = {
               id,
               title,
               description,
@@ -45,7 +45,7 @@ export const Card = ({ task }) => {
               priority,
               dueDate,
             };
-            handlerUpdate(updateTask);
+            handlerUpdate(id, updates);
           }}
         />
       </div>
