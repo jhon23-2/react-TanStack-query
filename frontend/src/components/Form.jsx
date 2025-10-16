@@ -11,7 +11,7 @@ export const Form = () => {
 
   useEffect(() => {
     if (!isAuth) {
-      navigate("/login");
+      navigate("/");
       toast.custom((t) => (
         <div
           className={`${
